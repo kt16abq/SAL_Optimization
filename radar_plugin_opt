@@ -1,0 +1,55 @@
+#ifndef RADAR_PROPERTIES_H_
+#define RADAR_PROPERTIES_H_
+#include <dw/core/Types.h>
+
+namespace dw
+{
+namespace plugin
+{
+namespace radar
+{
+
+//################################################################################
+//################ Sensor specific parameters and data structures ################
+//################################################################################
+
+//GENERAL
+static const uint32_t PACKETS_PER_SCAN        = 2;
+static const uint16_t MAX_PACKET_SIZE         = 6;     //TODO fill in value ??
+static const uint16_t LAST_PACKET_SIZE        = 8;     //TODO fill in value ??
+static const uint16_t MAX_SCANS_PER_SECOND    = 99;     //TODO fill in value ??
+static const uint16_t MAX_DETECTIONS_PER_SCAN = 99;     //TODO fill in value ??
+static const uint32_t PAYLOAD_OFFSET          = sizeof(uint32_t) + sizeof(dwTime_t);
+static const uint16_t MAX_SCAN_SIZE           = (PACKETS_PER_SCAN - 1) * MAX_PACKET_SIZE + LAST_PACKET_SIZE;
+static const uint32_t MAX_BUFFER_SIZE         = PACKETS_PER_SCAN * MAX_PACKET_SIZE;
+
+//DATA STRUCTURES
+#pragma pack(1)
+typedef struct
+{
+    uint8_t rawData[MAX_PACKET_SIZE + PAYLOAD_OFFSET];
+} rawPacket;
+
+typedef struct
+{
+    float32_t radius;          // 4 Bytes [meter]
+    float32_t radial_velocity; // 4       [meter/second]
+    float32_t azimuth_angle;   // 4       [rad]
+    float32_t rcs;             // 4       [dB]
+    float32_t elevation_angle; // 4       [rad]
+} RadarDetection;              // 20
+
+typedef struct
+{
+    dwTime_t sensor_timestamp;                   // 8
+    uint32_t num_returns;                        // 4
+    float32_t doppler_ambiguity;                 // 4
+    RadarDetection det[MAX_DETECTIONS_PER_SCAN]; // MAX_DETECTIONS_PER_SCAN * sizeof(RadarDetection)
+} RadarOutput;                                   // 16 + MAX_DETECTIONS_PER_SCAN * sizeof(RadarDetection) = 2016
+#pragma pack()
+
+} // namespace radar
+} // namespace plugin
+} // namespace dw
+
+#endif
